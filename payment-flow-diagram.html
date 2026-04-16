@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment System - New Workflow Diagram</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 24px;
+      color: #1a1a2e;
+    }
+    h1 { text-align: center; margin-bottom: 8px; }
+    h2 { text-align: center; color: #555; font-weight: 400; margin-top: 0; }
+    .diagram-section {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 32px;
+      margin: 24px auto;
+      max-width: 1100px;
+    }
+    .diagram-section h3 {
+      margin-top: 0;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 8px;
+    }
+    .mermaid { display: flex; justify-content: center; }
+  </style>
+</head>
+<body>
+
+<h1>Payment System Redesign</h1>
+<h2>New Workflow Diagrams</h2>
+
+<!-- ===== 1. Main User Flow ===== -->
+<div class="diagram-section">
+  <h3>1. Main User Flow (Buy Button Click)</h3>
+  <pre class="mermaid">
+flowchart TD
+    A["User clicks BUY"] --> B["GET /api/orders/pending?key_name=xxx"]
+    B --> C{Has pending order?}
+
+    C -- No --> D["POST /api/orders\n(status = PREPARED)"]
+    D --> E["Show Payment Method Selector"]
+    E --> F{User picks method}
+    F -- Stripe --> G["POST /api/orders/:id/pay\n{method: stripe}"]
+    F -- PayPay --> H["POST /api/orders/:id/pay\n{method: paypay}"]
+    G --> I["Redirect to Stripe Checkout"]
+    H --> J["Redirect to PayPay QR"]
+
+    C -- Yes --> K["Show PendingOrderDialog"]
+    K --> L{User choice}
+    L -- "Resume Payment" --> M["Navigate to /payment/:orderId"]
+    L -- "View Voucher\n(konbini)" --> N["Open hosted_voucher_url"]
+    L -- "Cancel &\nNew Method" --> O["POST /api/orders/:id/cancel-payment\n?full_cancel=false"]
+    O --> P{Cancel succeeded?}
+    P -- Yes --> E
+    P -- "No (409)" --> Q["Show: Payment is\nbeing processed"]
+
+    I --> R["User pays"]
+    J --> R
+    R --> S["Webhook from Provider"]
+    S --> T["Order → SUCCESS\nPermission created"]
+    T --> U["/payment/:orderId detects\nstatus change via polling"]
+    U --> V["Redirect to /paid\n(success / gacha page)"]
+
+    style A fill:#4361ee,color:#fff,stroke:none
+    style T fill:#2d6a4f,color:#fff,stroke:none
+    style V fill:#2d6a4f,color:#fff,stroke:none
+    style K fill:#e76f51,color:#fff,stroke:none
+    style Q fill:#e76f51,color:#fff,stroke:none
+  </pre>
+</div>
+
+<!-- ===== 2. Order State Machine ===== -->
+<div class="diagram-section">
+  <h3>2. Order State Machine</h3>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --> PREPARED : Order created
+
+    PREPARED --> PENDING : Payment session created
+    PREPARED --> CANCELLED : User cancels before paying
+
+    PENDING --> SUCCESS : Webhook confirms payment
+    PENDING --> FAILED : Webhook: payment failed/expired
+    PENDING --> PREPARED : User cancels to switch method
+    PENDING --> CANCELLED : User fully cancels order
+
+    CANCELLED --> SUCCESS : Race condition:\nwebhook after cancel\n(honor payment)
+
+    SUCCESS --> [*]
+    FAILED --> [*]
+  </pre>
+</div>
+
+<!-- ===== 3. Konbini Recovery Flow ===== -->
+<div class="diagram-section">
+  <h3>3. Konbini Payment &amp; Recovery Flow</h3>
+  <pre class="mermaid">
+sequenceDiagram
+    actor User
+    participant FE as Frontend
+    participant BE as Backend
+    participant Stripe
+
+    User->>FE: Click "Buy"
+    FE->>BE: POST /api/orders
+    BE-->>FE: order #501 (PREPARED)
+    FE->>BE: POST /api/orders/501/pay {stripe}
+    BE->>Stripe: Create Checkout Session
+    Stripe-->>BE: session URL
+    BE-->>FE: redirect_url
+    FE->>Stripe: Redirect to Checkout
+    User->>Stripe: Picks Konbini, sees voucher
+    Stripe->>BE: Webhook: session.completed (payment_status=unpaid)
+    BE->>BE: Store hosted_voucher_url + expires_at in payment_metadata
+    Note over User: User closes browser, forgets code
+
+    rect rgb(255, 243, 224)
+      Note over User,Stripe: Next day - User returns
+      User->>FE: Click "Buy gl-3" again
+      FE->>BE: GET /api/orders/pending?key_name=gl-3
+      BE-->>FE: Order #501 (konbini, expires Apr 18)
+      FE->>User: PendingOrderDialog: "Pending konbini payment"
+      User->>FE: Click "View Payment Instructions"
+      FE->>User: Opens hosted_voucher_url (payment code visible)
+    end
+
+    User->>Stripe: Pays at convenience store
+    Stripe->>BE: Webhook: async_payment_succeeded
+    BE->>BE: Order #501 → SUCCESS, create Permission
+    FE->>BE: Polling detects SUCCESS
+    FE->>User: Redirect to /paid
+  </pre>
+</div>
+
+<!-- ===== 4. Cancel & Switch Method ===== -->
+<div class="diagram-section">
+  <h3>4. Cancel Payment &amp; Switch Method</h3>
+  <pre class="mermaid">
+sequenceDiagram
+    actor User
+    participant FE as Frontend
+    participant BE as Backend
+    participant PayPay
+    participant Stripe
+
+    User->>FE: Click "Buy"
+    FE->>BE: POST /api/orders → order #502
+    FE->>BE: POST /api/orders/502/pay {paypay}
+    BE->>PayPay: Create QR
+    PayPay-->>BE: QR URL
+    BE-->>FE: redirect to PayPay
+
+    Note over User: User changes mind, wants card
+
+    User->>FE: Click "Cancel & Choose New Method"
+    FE->>BE: POST /api/orders/502/cancel-payment?full_cancel=false
+    BE->>PayPay: cancelPayment() API
+    PayPay-->>BE: OK
+    BE->>BE: Order → PREPARED, clear invoice_id
+    BE-->>FE: 200 OK
+
+    FE->>User: Show Payment Method Selector
+    User->>FE: Picks "Stripe"
+    FE->>BE: POST /api/orders/502/pay {stripe}
+    BE->>Stripe: Create Checkout Session
+    Stripe-->>BE: session URL
+    FE->>Stripe: Redirect
+    User->>Stripe: Pays with card
+    Stripe->>BE: Webhook → SUCCESS
+    BE->>BE: Permission created
+  </pre>
+</div>
+
+<!-- ===== 5. Pages & Components Map ===== -->
+<div class="diagram-section">
+  <h3>5. Pages &amp; Components Architecture</h3>
+  <pre class="mermaid">
+flowchart LR
+    subgraph "Existing Pages (modify)"
+        A["Product / Category Page\n(Buy button)"]
+        B["CheckoutSelectorModal\n⚠️ Fix: remove PayPay\nauto-create on open"]
+        C["/paid\nSuccess / Gacha page"]
+    end
+
+    subgraph "New Components"
+        D["PendingOrderDialog\n(modal)"]
+        E["/payment/:orderId\n(new page)"]
+    end
+
+    A -->|"click Buy"| F{Pending order?}
+    F -- No --> B
+    F -- Yes --> D
+
+    D -->|Resume| E
+    D -->|Cancel & Switch| B
+    B -->|Pay| E
+    E -->|SUCCESS| C
+
+    subgraph "Sub-components of /payment/:orderId"
+        G["PaymentMethodSelector"]
+        H["KonbiniPendingView\n(voucher link + expiry)"]
+        I["WaitingForPayment\n(spinner + polling)"]
+        J["ErrorView\n(retry option)"]
+    end
+
+    E --> G
+    E --> H
+    E --> I
+    E --> J
+
+    style D fill:#ff6b6b,color:#fff,stroke:none
+    style E fill:#ff6b6b,color:#fff,stroke:none
+    style G fill:#ffa07a,color:#fff,stroke:none
+    style H fill:#ffa07a,color:#fff,stroke:none
+    style I fill:#ffa07a,color:#fff,stroke:none
+    style J fill:#ffa07a,color:#fff,stroke:none
+  </pre>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+    sequence: { useMaxWidth: true, mirrorActors: false },
+  });
+</script>
+</body>
+</html>

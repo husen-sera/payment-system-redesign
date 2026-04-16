@@ -575,6 +575,23 @@
       color: #666;
     }
 
+    .diagram-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #0A7BA7;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .diagram-link:hover {
+      background: #085A7D;
+    }
+
     .section-divider {
       margin: 2rem 0;
       border: none;
@@ -716,7 +733,8 @@
           "User pays \u2192 Webhook confirms",
           "[Has pending] \u2192 Resume / Cancel & Switch dialog"
         ],
-        insight: "Interactive diagrams available: Main User Flow, Order State Machine, Konbini Recovery Flow, Cancel & Switch Method, Pages & Components Architecture"
+        insight: "Interactive diagrams available: Main User Flow, Order State Machine, Konbini Recovery Flow, Cancel & Switch Method, Pages & Components Architecture",
+        link: { url: "payment-flow-diagram.html", label: "Open Interactive Diagrams" }
       },
       {
         id: "unified-flow",
@@ -1077,6 +1095,7 @@
             `).join('')}
           </div>
           ${slide.insight ? `<p class="flow-insight">${slide.insight}</p>` : ''}
+          ${slide.link ? `<a href="${slide.link.url}" target="_blank" class="diagram-link">${slide.link.label} &rarr;</a>` : ''}
         `;
       } else if (slide.type === 'endpoints') {
         html = `
