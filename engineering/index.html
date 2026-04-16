@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment System Redesign</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: white;
+      color: #1E2761;
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #F5F5F5;
+      border-right: 0.5px solid #E0E0E0;
+      padding: 2rem 0;
+      overflow-y: auto;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 0 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 500;
+      margin: 0 0 0.5rem 0;
+      color: #1E2761;
+    }
+
+    .sidebar-header p {
+      font-size: 12px;
+      color: #999;
+      margin: 0;
+    }
+
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .sidebar button {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 13px;
+      color: #999;
+      transition: all 0.2s;
+      font-weight: 400;
+    }
+
+    .sidebar button.active {
+      background: white;
+      color: #0A7BA7;
+      font-weight: 500;
+    }
+
+    .sidebar button:hover {
+      color: #1E2761;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 3rem 4rem;
+    }
+
+    .content-wrapper {
+      max-width: 900px;
+    }
+
+    .slide-content {
+      animation: slideIn 0.8s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      font-size: 48px;
+      font-weight: 500;
+      margin: 0 0 1rem 0;
+    }
+
+    h2 {
+      font-size: 32px;
+      font-weight: 500;
+      margin: 0 0 2rem 0;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0 0 1rem 0;
+    }
+
+    h4 {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: #666666;
+      margin: 0 0 2rem 0;
+    }
+
+    .intro-text {
+      font-size: 16px;
+      color: #666666;
+      margin: 0 0 2rem 0;
+    }
+
+    .meta-info {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+      font-size: 13px;
+      color: #999;
+    }
+
+    .meta-info span {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .card {
+      padding: 1.5rem;
+      background: #F5F5F5;
+      border-radius: 12px;
+      border: 0.5px solid #E0E0E0;
+    }
+
+    .card-accent {
+      border-left: 3px solid #0A7BA7;
+    }
+
+    .card h3 {
+      color: #0A7BA7;
+      margin: 0 0 1rem 0;
+    }
+
+    .card p {
+      color: #666666;
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .card-number {
+      font-size: 28px;
+      font-weight: 500;
+      color: #0A7BA7;
+      margin-bottom: 0.5rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    ul li {
+      padding: 0.5rem 0;
+      color: #666666;
+      font-size: 13px;
+    }
+
+    table {
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 8px;
+      font-weight: 500;
+      color: #1E2761;
+      border-bottom: 0.5px solid #E0E0E0;
+    }
+
+    td {
+      padding: 12px 8px;
+      border-bottom: 0.5px solid #E0E0E0;
+    }
+
+    tr:nth-child(even) {
+      background: #F5F5F5;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .detail-item {
+      padding: 0.75rem;
+      background: #F5F5F5;
+      border: 0.5px solid #E0E0E0;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .flow-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #0A7BA7;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .flow-content {
+      padding: 1rem;
+      background: #F5F5F5;
+      border-radius: 8px;
+      border: 0.5px solid #E0E0E0;
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .flow-insight {
+      font-size: 13px;
+      color: #666666;
+      margin-top: 2rem;
+      font-style: italic;
+    }
+
+    .endpoint-item {
+      padding: 1rem;
+      background: #F5F5F5;
+      border-radius: 8px;
+      border: 0.5px solid #E0E0E0;
+      display: grid;
+      grid-template-columns: 80px 1fr 250px;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .endpoint-method {
+      font-size: 12px;
+      font-weight: 500;
+      color: #27AE60;
+      background: white;
+      padding: 0.5rem;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .endpoint-path {
+      font-size: 12px;
+      color: #1E2761;
+      font-family: monospace;
+    }
+
+    .endpoint-desc {
+      font-size: 13px;
+      color: #666666;
+      text-align: right;
+    }
+
+    code {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 0.5px solid #E0E0E0;
+    }
+
+    .button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .button-secondary {
+      background: white;
+      border: 0.5px solid #E0E0E0;
+      color: #1E2761;
+    }
+
+    .button-secondary:hover {
+      background: #F5F5F5;
+    }
+
+    .button-primary {
+      background: #0A7BA7;
+      color: white;
+    }
+
+    .button-primary:hover {
+      background: #085A7D;
+    }
+
+    .page-counter {
+      font-size: 13px;
+      color: #999;
+    }
+
+    .text-success {
+      color: #27AE60;
+    }
+
+    .text-danger {
+      color: #E24B4A;
+    }
+
+    .text-info {
+      color: #0A7BA7;
+    }
+
+    .text-secondary {
+      color: #666666;
+    }
+
+    .pre-text {
+      padding: 1.5rem;
+      background: #F5F5F5;
+      border-radius: 12px;
+      border: 0.5px solid #E0E0E0;
+      font-size: 13px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      color: #666666;
+      white-space: pre-wrap;
+      line-height: 1.8;
+    }
+
+    .summary-box {
+      padding: 2rem;
+      background: #F5F5F5;
+      border-radius: 12px;
+      border: 0.5px solid #E0E0E0;
+      text-align: center;
+    }
+
+    .summary-box p {
+      font-size: 16px;
+      font-weight: 500;
+      color: #0A7BA7;
+      margin: 0;
+    }
+
+    .risk-item {
+      padding: 1rem;
+      background: #F5F5F5;
+      border-radius: 8px;
+      border: 0.5px solid #E0E0E0;
+      display: grid;
+      grid-template-columns: 160px 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .risk-title {
+      font-weight: 500;
+      color: #E24B4A;
+      font-size: 13px;
+    }
+
+    .risk-impact {
+      color: #999;
+      font-size: 13px;
+    }
+
+    .risk-mitigation {
+      color: #666666;
+      font-size: 13px;
+    }
+
+    .timeline-item {
+      padding: 1.25rem;
+      background: #F5F5F5;
+      border-radius: 8px;
+      border-left: 4px solid #0A7BA7;
+      margin-bottom: 1.25rem;
+    }
+
+    .timeline-item h4 {
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-weeks {
+      font-size: 12px;
+      font-weight: 500;
+      color: #0A7BA7;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-details {
+      font-size: 13px;
+      color: #666;
+      margin: 0;
+    }
+
+    .timeline-details li {
+      padding: 0.25rem 0;
+    }
+
+    .gantt-chart {
+      padding: 1.5rem;
+      background: #1E2761;
+      border-radius: 12px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      color: #ccc;
+      white-space: pre;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    .gantt-chart .bar {
+      color: #0A7BA7;
+    }
+
+    .gantt-chart .label {
+      color: #fff;
+    }
+
+    .scenario-timeline {
+      position: relative;
+      padding-left: 2rem;
+      border-left: 2px solid #E0E0E0;
+    }
+
+    .scenario-step {
+      position: relative;
+      padding: 0.75rem 0 0.75rem 1.5rem;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .scenario-step::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #0A7BA7;
+      border: 2px solid white;
+      margin-left: -1px;
+    }
+
+    .scenario-step.highlight {
+      color: #0A7BA7;
+      font-weight: 500;
+    }
+
+    .scenario-step.success {
+      color: #27AE60;
+      font-weight: 500;
+    }
+
+    .scenario-step.success::before {
+      background: #27AE60;
+    }
+
+    .scenario-result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #F5F5F5;
+      border-radius: 8px;
+      border: 0.5px solid #E0E0E0;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0A7BA7;
+    }
+
+    .changes-section {
+      margin-bottom: 2rem;
+    }
+
+    .changes-section h3 {
+      margin-bottom: 0.75rem;
+    }
+
+    .changes-section li {
+      padding: 0.4rem 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .file-row {
+      padding: 0.75rem 1rem;
+      background: #F5F5F5;
+      border-radius: 8px;
+      border: 0.5px solid #E0E0E0;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+      align-items: center;
+    }
+
+    .file-name {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      color: #0A7BA7;
+      font-weight: 500;
+    }
+
+    .file-purpose {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .diagram-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #0A7BA7;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .diagram-link:hover {
+      background: #085A7D;
+    }
+
+    .section-divider {
+      margin: 2rem 0;
+      border: none;
+      border-top: 0.5px solid #E0E0E0;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #E0E0E0;
+      border-radius: 3px;
+    }
+
+    .main-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .main-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .main-content::-webkit-scrollbar-thumb {
+      background: #E0E0E0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1>Payment System</h1>
+        <p>Redesign 2026</p>
+      </div>
+      <nav id="nav-list"></nav>
+    </div>
+
+    <div class="main-content">
+      <div class="content-wrapper">
+        <div id="slide-content" class="slide-content"></div>
+        <div class="footer">
+          <button class="button button-secondary" onclick="previousSlide()">&larr; Previous</button>
+          <span class="page-counter"><span id="current-page">1</span> / <span id="total-pages">1</span></span>
+          <button class="button button-primary" onclick="nextSlide()">Next &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slides = [
+      {
+        id: "title",
+        title: "Payment System Redesign",
+        subtitle: "Solving duplicate orders, lost payments & unsafe cancellation",
+        type: "title",
+        details: ["Duplicate order prevention", "Konbini payment recovery", "Payment cancel & switch", "Auto-refresh payment status"],
+        meta: { date: "2026-04-15", status: "Draft / Discussion", team: "Backend (Laravel) + Frontend (React)" }
+      },
+      {
+        id: "problems",
+        title: "Current Problems",
+        type: "list",
+        intro: "6 issues in today's payment system",
+        items: [
+          { num: "1", title: "Duplicate orders", desc: "User can create multiple pending orders for the same item" },
+          { num: "2", title: "Lost konbini info", desc: "If user closes page, payment code is gone forever" },
+          { num: "3", title: "No resume flow", desc: "User cannot continue an unfinished payment" },
+          { num: "4", title: "Unsafe cancel", desc: "Cancel only updates DB, does NOT call Stripe/PayPay API" },
+          { num: "5", title: "Manual refresh", desc: "UI does not auto-update after payment" },
+          { num: "6", title: "Race condition", desc: "Payment can succeed after cancel, causing data inconsistency" }
+        ]
+      },
+      {
+        id: "overview",
+        title: "Before vs After Overview",
+        type: "table",
+        rows: [
+          ["Order creation", "Order + payment created together", "Order first, payment separate"],
+          ["Duplicate check", "None", "Pending order check before every purchase"],
+          ["Konbini page close", "Payment code lost forever", "Voucher URL stored in DB, accessible anytime"],
+          ["Resume payment", "Not possible", "Dialog shows resume option"],
+          ["Cancel payment", "DB update only", "API call to Stripe/PayPay"],
+          ["Switch method", "Not possible", "Cancel old + create new (same order)"],
+          ["Payment status", "Manual refresh needed", "Auto-polling (5-30 sec)"],
+          ["PayPay modal", "Creates order on modal open", "Creates order only on button click"]
+        ]
+      },
+      {
+        id: "order-flow",
+        title: "Order Flow Comparison",
+        type: "two-col",
+        left: { title: "BEFORE", items: ["User clicks \"Buy\"", "Create order + payment session together", "Redirect to provider", "No check for existing orders", "Opening payment modal = orphan PayPay order"] },
+        right: { title: "AFTER", items: ["User clicks \"Buy\"", "Check: pending order for same item?", "YES: show resume/cancel dialog", "NO: create order (PREPARED)", "User picks method \u2192 create payment session (PENDING)", "Payment only created when user clicks button"] }
+      },
+      {
+        id: "cancel-flow",
+        title: "Cancel Flow Comparison",
+        type: "two-col",
+        left: { title: "BEFORE", items: ["User cancels", "DB status updated to FAILED", "Stripe/PayPay NOT notified", "Provider may still collect money", "No cleanup of coupon/lock"] },
+        right: { title: "AFTER", items: ["User cancels", "Call provider cancel API first", "If API succeeds \u2192 update DB status", "If API fails \u2192 DON'T update DB (payment in progress)", "Cleanup: coupon unlinked, Redis lock cleared", "Webhook remains final authority"] }
+      },
+      {
+        id: "konbini",
+        title: "Konbini Payment Recovery",
+        type: "two-col",
+        left: { title: "BEFORE", items: ["User picks konbini \u2192 sees payment code on Stripe page", "Closes browser", "Payment code LOST", "Can't pay at store", "Order stuck PENDING for 3 days", "Expires \u2192 user must start over"] },
+        right: { title: "AFTER", items: ["User picks konbini \u2192 sees payment code", "Webhook stores voucher URL in DB", "User closes browser", "Comes back next day", "System shows: \"Pending payment (expires Apr 18)\"", "Clicks \"View Payment Instructions\"", "Sees payment code again \u2192 pays at store \u2192 SUCCESS"] }
+      },
+      {
+        id: "principles",
+        title: "Core Design Principles",
+        type: "principles",
+        intro: "6 rules that guide the redesign",
+        items: [
+          { num: "1", title: "Order = Single Source of Truth", desc: "Payment sessions are disposable, order persists" },
+          { num: "2", title: "One Pending Order Per User Per Item", desc: "Check before creating new" },
+          { num: "3", title: "Webhook = Only Trusted Status Source", desc: "Frontend never writes status" },
+          { num: "4", title: "Payments Are Replaceable", desc: "Cancel old session, create new one, same order ID" },
+          { num: "5", title: "Always Cancel Via Provider API", desc: "Never just update database" },
+          { num: "6", title: "Store Async Payment Details", desc: "So user can resume (konbini voucher URL, expiry)" }
+        ]
+      },
+      {
+        id: "workflow-diagram",
+        title: "Visual Workflow Diagram",
+        type: "flow",
+        intro: "New payment flow at a glance",
+        steps: [
+          "Buy \u2192 Pending check",
+          "[No pending] \u2192 Create order (PREPARED)",
+          "Pick payment method \u2192 Create session (PENDING)",
+          "User pays \u2192 Webhook confirms",
+          "[Has pending] \u2192 Resume / Cancel & Switch dialog"
+        ],
+        insight: "Interactive diagrams available: Main User Flow, Order State Machine, Konbini Recovery Flow, Cancel & Switch Method, Pages & Components Architecture",
+        link: { url: "payment-flow-diagram.html", label: "Open Interactive Diagrams" }
+      },
+      {
+        id: "unified-flow",
+        title: "Unified Payment Flow",
+        type: "flow",
+        intro: "Both Stripe and PayPay share ONE flow",
+        steps: [
+          "POST /api/orders \u2192 Create order (PREPARED)",
+          "POST /api/orders/{id}/pay \u2192 Create payment session (PENDING)",
+          "User pays \u2192 Stripe / PayPay / Konbini",
+          "Webhook confirms \u2192 SUCCESS or FAILED",
+          "Frontend polls & updates \u2192 Auto-redirect to success"
+        ],
+        insight: "Key insight: Order created ONCE, payment can be attempted multiple times"
+      },
+      {
+        id: "pending-check",
+        title: "Pending Order Check Flow",
+        type: "text",
+        intro: "What happens when user clicks \"Buy\"",
+        content: "User clicks \"Buy\"\n    |\n    v\nCheck pending order (same user + same item)\n    |\n    +-- No pending \u2192 open payment method selector\n    |\n    +-- Has pending \u2192 show dialog:\n        |\n        +-- \"Resume Payment\" (open voucher / PayPay)\n        +-- \"View Status\" (go to /payment/:orderId)\n        +-- \"Cancel & New Method\" (cancel API \u2192 new payment)\n\nPrevents duplicate orders automatically"
+      },
+      {
+        id: "cancel-switch",
+        title: "Cancel & Switch Payment Method",
+        type: "flow",
+        intro: "User started PayPay, wants Stripe instead",
+        steps: [
+          "User clicks \"Cancel & Choose New Method\"",
+          "Backend calls PayPay cancelPayment() API",
+          "Order status \u2192 PREPARED (not FAILED \u2014 order still valid)",
+          "User picks Stripe \u2192 new Stripe session created",
+          "Same order ID, different payment session"
+        ],
+        insight: "Both providers support cancellation: PayPay cancelPayment() (already implemented) | Stripe sessions\u2192expire() + paymentIntents\u2192cancel()"
+      },
+      {
+        id: "race-condition",
+        title: "Race Condition Handling",
+        type: "text",
+        intro: "Most dangerous edge case: payment succeeds after cancel",
+        content: "T=0  User gets konbini voucher\nT=1  User goes to convenience store\nT=2  Meanwhile, user cancels from phone\nT=3  User pays at store (cancel was too late)\nT=4  Webhook: payment succeeded\n\nSOLUTION:\n\u2022 Cancel API call may fail \u2192 if it fails, DON'T update order status\n\u2022 Webhook always takes priority over local status\n\u2022 If CANCELLED order gets success webhook \u2192 still mark SUCCESS\n\u2022 Log CRITICAL alert for manual review\n\u2022 Rule: If money was collected, always honor it"
+      },
+      {
+        id: "state-machine",
+        title: "State Machine",
+        type: "text",
+        intro: "Order status transitions",
+        content: "PREPARED \u2192 PENDING \u2192 SUCCESS (terminal)\n              \u2193\n           FAILED (terminal)\n\nSpecial transitions:\n\u2022 PENDING \u2192 PREPARED (switch method \u2014 same order)\n\u2022 PENDING \u2192 CANCELLED (user abandons)\n\u2022 CANCELLED \u2192 SUCCESS (race condition \u2014 honor payment)\n\nKey Rules:\n\u2022 FAILED = terminal (create new order to retry)\n\u2022 CANCELLED \u2192 SUCCESS = rare but must be handled\n\u2022 PENDING \u2192 PREPARED = \"switch method\" transition"
+      },
+      {
+        id: "api-endpoints",
+        title: "New API Endpoints",
+        type: "endpoints",
+        intro: "5 new endpoints",
+        items: [
+          { method: "GET", path: "/api/orders/pending", desc: "Check pending order" },
+          { method: "POST", path: "/api/orders", desc: "Create order" },
+          { method: "GET", path: "/api/orders/{id}/status", desc: "Poll status" },
+          { method: "POST", path: "/api/orders/{id}/pay", desc: "Create payment session" },
+          { method: "POST", path: "/api/orders/{id}/cancel-payment", desc: "Cancel payment" }
+        ]
+      },
+      {
+        id: "frontend",
+        title: "Two New Frontend Components",
+        type: "two-col",
+        left: { title: "PendingOrderDialog (Modal)", items: ["Appears before checkout when pending order found", "Shows: resume, view voucher, or cancel & switch", "Quick interceptor \u2014 no page navigation needed"] },
+        right: { title: "/payment/:orderId (Page)", items: ["Dedicated payment status hub", "Auto-polls for payment confirmation", "Shows konbini voucher link + expiry", "Can be bookmarked and revisited", "Auto-redirects to success page when paid"] }
+      },
+      {
+        id: "pages-components",
+        title: "Pages & Components to Build",
+        type: "pages-components",
+        pages: [
+          { name: "PaymentPage", route: "/payment/:orderId", purpose: "Payment status hub with auto-polling, voucher info, cancel/switch" },
+          { name: "PendingOrderDialog", route: "(modal)", purpose: "Intercept before checkout \u2014 resume, view voucher, or cancel & switch" }
+        ],
+        components: [
+          { name: "PaymentMethodSelector", condition: "Order is PREPARED (no payment yet)" },
+          { name: "KonbiniPendingView", condition: "Pending konbini \u2014 voucher link + expiry countdown" },
+          { name: "WaitingForPayment", condition: "Pending card/PayPay \u2014 spinner + 5s polling" },
+          { name: "ErrorView", condition: "Failed or cancelled \u2014 retry option" }
+        ]
+      },
+      {
+        id: "pages-modify",
+        title: "Pages to Modify (Existing)",
+        type: "two-col",
+        left: { title: "CheckoutSelectorModal.tsx", items: ["Bug fix: Remove fetchPayPayUrl from useEffect (~line 207)", "PayPay order only created when user clicks the PayPay button", "Prevents orphan orders on modal open"] },
+        right: { title: "Product / Category Page (Buy button)", items: ["Add GET /api/orders/pending?key_name=xxx before opening modal", "If pending order found \u2192 show PendingOrderDialog instead", "If no pending \u2192 open CheckoutSelectorModal as normal"] }
+      },
+      {
+        id: "nav-map",
+        title: "Page Navigation Map",
+        type: "text",
+        intro: "How users navigate through the payment system",
+        content: "Product Page (Buy button)\n    \u2502\n    \u251c\u2500\u2500 No pending \u2192 CheckoutSelectorModal (modified)\n    \u2502   \u2514\u2500\u2500 Pick method \u2192 Create order \u2192 Pay\n    \u2502       \u2514\u2500\u2500 /payment/:orderId (polling)\n    \u2502\n    \u2514\u2500\u2500 Has pending \u2192 PendingOrderDialog (new)\n        \u251c\u2500\u2500 Resume \u2192 /payment/:orderId\n        \u251c\u2500\u2500 View Voucher \u2192 hosted_voucher_url\n        \u2514\u2500\u2500 Cancel & Switch \u2192 CheckoutSelectorModal\n\n/payment/:orderId\n    \u251c\u2500\u2500 PREPARED \u2192 PaymentMethodSelector\n    \u251c\u2500\u2500 PENDING (konbini) \u2192 KonbiniPendingView\n    \u251c\u2500\u2500 PENDING (card/paypay) \u2192 WaitingForPayment\n    \u251c\u2500\u2500 SUCCESS \u2192 /paid (gacha page)\n    \u2514\u2500\u2500 FAILED/CANCELLED \u2192 ErrorView"
+      },
+      {
+        id: "backend-files",
+        title: "New Backend Files",
+        type: "file-table",
+        files: [
+          { name: "app/Services/OrderService.php", purpose: "Unified order logic (find pending, create, pay, cancel, webhook handling)" },
+          { name: "app/Http/Controllers/OrderController.php", purpose: "REST controller for 5 new endpoints" },
+          { name: "migration: add_payment_metadata", purpose: "JSON column for konbini voucher URL, expiry, provider metadata" },
+          { name: "migration: add_cancelled_status", purpose: "New CANCELLED status in purchase_histories enum" }
+        ],
+        reuses: [
+          "PurchaseService.php \u2192 session creation",
+          "PurchaseController.php \u2192 Stripe flow",
+          "PayPayController.php \u2192 PayPay flow",
+          "PurchaseHistoryObserver.php \u2192 Permission creation (unchanged)"
+        ]
+      },
+      {
+        id: "refresh",
+        title: "Auto-Refresh Strategy",
+        type: "refresh-table",
+        intro: "Simple polling (not WebSocket)",
+        items: [
+          { context: "Card / PayPay", interval: "5 seconds", duration: "10 minutes" },
+          { context: "Konbini", interval: "30 seconds", duration: "Until page close" },
+          { context: "Payment page", interval: "10 seconds", duration: "Until page close" }
+        ],
+        actions: "SUCCESS \u2192 redirect to gacha/success page | FAILED \u2192 show error + retry | CANCELLED \u2192 redirect to home"
+      },
+      {
+        id: "bugfix",
+        title: "Bug Fix: Orphan PayPay Orders",
+        type: "two-col",
+        left: { title: "BEFORE (Current Bug)", items: ["Modal opens \u2192 useEffect runs", "PayPay order created immediately", "User closes modal \u2192 orphan order in DB", "Every \"just looking\" = wasted order"] },
+        right: { title: "AFTER (Fixed)", items: ["Modal opens \u2192 NO order created", "User clicks PayPay button", "THEN order created", "No orphan orders"] }
+      },
+      {
+        id: "benefits",
+        title: "Benefits of Proposed Solution",
+        type: "benefits",
+        sections: [
+          { title: "For Users", items: ["Never lose konbini payment code again", "Can switch payment method without starting over", "Payment status updates automatically (no manual refresh)", "Clear feedback: \"you have a pending order\" instead of confusion"] },
+          { title: "For Business", items: ["No duplicate orders cluttering the database", "No \"lost\" payments (money collected but order not fulfilled)", "Cancel is safe (provider always notified)", "Race conditions handled properly"] },
+          { title: "For Developers", items: ["One unified flow for all payment providers", "Clear state machine (predictable transitions)", "Idempotent webhooks (safe to replay)", "Existing code reused, not rewritten"] }
+        ]
+      },
+      {
+        id: "pros-cons",
+        title: "Pros & Cons",
+        type: "pros-cons",
+        pros: ["Eliminates all 6 current problems", "Backward compatible (old endpoints still work during migration)", "No infrastructure change (no new services, no WebSocket server)", "Konbini recovery uses Stripe's hosted page (no custom UI needed)", "PayPay cancel already implemented (just needs wiring)", "Polling is simple and reliable for small-mid team", "Observer pattern (Permission creation) unchanged"],
+        cons: ["5 new API endpoints to build and maintain", "New /payment/:orderId page needs frontend development", "Polling uses network requests (small overhead, acceptable for this scale)", "Migration period: old + new endpoints coexist temporarily", "Race condition (CANCELLED \u2192 SUCCESS) requires manual review process", "Team needs to understand new state machine (PREPARED \u2192 PENDING \u2192 SUCCESS)"]
+      },
+      {
+        id: "risks",
+        title: "Risks & Mitigation",
+        type: "risks",
+        items: [
+          { risk: "Race condition (cancel vs payment)", impact: "Money collected but order cancelled", mit: "Cancel API first, webhook takes priority, log alert" },
+          { risk: "Duplicate payments", impact: "User charged twice", mit: "Cancel existing session before creating new" },
+          { risk: "Konbini expires (3 days)", impact: "User can't pay", mit: "Webhook marks FAILED, show expiry countdown" },
+          { risk: "Webhook doesn't arrive", impact: "Order stuck PENDING", mit: "Stripe retries 3 days + scheduled job safety net" },
+          { risk: "Coupon double-use", impact: "Discount applied twice", mit: "Unlink coupon on cancel (existing logic)" },
+          { risk: "Migration break", impact: "Current payment stops working", mit: "Keep old endpoints, feature flag new ones" }
+        ]
+      },
+      {
+        id: "changes",
+        title: "What Changes vs What Stays",
+        type: "changes",
+        changed: [
+          "New payment_metadata column (JSON)",
+          "New CANCELLED status in enum",
+          "5 new API endpoints",
+          "New OrderService class",
+          "PendingOrderDialog component",
+          "/payment/:orderId page",
+          "Konbini webhook stores voucher URL",
+          "CheckoutSelectorModal bug fix"
+        ],
+        stays: [
+          "PurchaseHistoryObserver (auto Permission creation)",
+          "Stripe/PayPay webhook endpoints & signature verification",
+          "Coupon/gacha/lock logic (all TICKET*SERA* features)",
+          "Success page (/paid) and gacha animation",
+          "Admin pages (paypay-history, etc.)",
+          "All existing routes (backward compatible)"
+        ]
+      },
+      {
+        id: "timeline",
+        title: "Implementation Timeline",
+        type: "timeline",
+        phases: [
+          { name: "Phase 1: Foundation", weeks: "Week 1-2", items: ["Add payment_metadata column migration", "Add CANCELLED status to enum", "Create OrderService (extract from existing controllers)", "Add 5 new API endpoints (behind feature flag)", "Unit tests for OrderService"] },
+          { name: "Phase 2: Konbini Recovery", weeks: "Week 3", items: ["Update handleKonbiniVoucherIssued() to store voucher URL", "Add pending order check endpoint", "Test: create konbini order \u2192 close page \u2192 reopen \u2192 see voucher", "Test: konbini expiry \u2192 webhook marks FAILED"] },
+          { name: "Phase 3: Frontend Integration", weeks: "Week 4-5", items: ["Build PendingOrderDialog component", "Build /payment/:orderId page", "Fix CheckoutSelectorModal (remove PayPay useEffect)", "Wire cancel & switch flow", "Integration test: full flow with Stripe test mode"] },
+          { name: "Phase 4: Polish & Launch", weeks: "Week 6", items: ["Add auto-polling on payment page", "QA: test all 4 timeline scenarios", "QA: test race condition scenario", "Enable feature flag on staging", "Monitor for 1 week \u2192 enable on production"] },
+          { name: "Phase 5: Cleanup", weeks: "Week 7+", items: ["Deprecate old endpoints", "Remove feature flag", "Add scheduled job for stale order cleanup (optional)"] }
+        ]
+      },
+      {
+        id: "gantt",
+        title: "Gantt Chart",
+        type: "gantt"
+      },
+      {
+        id: "scenario-konbini",
+        title: "Scenario: Konbini Resume",
+        type: "scenario",
+        intro: "User forgets payment code, comes back next day",
+        steps: [
+          { text: "Day 1: Buy \u2192 Stripe Checkout \u2192 pick Konbini \u2192 get voucher", highlight: false },
+          { text: "Webhook stores voucher URL in DB", highlight: true },
+          { text: "User closes browser (forgets code!)", highlight: false },
+          { text: "Day 2: User opens app \u2192 clicks \"Buy\" same item", highlight: false },
+          { text: "System finds pending order", highlight: true },
+          { text: "Dialog: \"Pending konbini payment (expires Apr 18)\"", highlight: false },
+          { text: "User clicks \"View Payment Instructions\"", highlight: false },
+          { text: "Opens Stripe voucher page \u2192 sees code again", highlight: true },
+          { text: "Goes to store \u2192 pays", highlight: false },
+          { text: "Webhook: SUCCESS \u2192 Permission granted", highlight: false, success: true }
+        ]
+      },
+      {
+        id: "scenario-switch",
+        title: "Scenario: Cancel & Switch",
+        type: "scenario",
+        intro: "User changes mind about payment method",
+        steps: [
+          { text: "T=0  User clicks \"Buy gl-3\"", highlight: false },
+          { text: "T=1  Creates order #502 (PREPARED)", highlight: true },
+          { text: "T=2  Picks PayPay \u2192 QR code created (PENDING)", highlight: false },
+          { text: "T=3  User decides they want card instead", highlight: false },
+          { text: "T=4  Clicks \"Cancel & Choose New Method\"", highlight: true },
+          { text: "T=5  Backend calls PayPay cancel API", highlight: false },
+          { text: "T=6  Order \u2192 PREPARED (same order, no payment)", highlight: true },
+          { text: "T=7  User picks Stripe \u2192 new session created", highlight: false },
+          { text: "T=8  Pays with card", highlight: false },
+          { text: "T=9  Webhook: SUCCESS \u2192 Permission granted", highlight: false, success: true }
+        ],
+        result: "Result: 1 order, 2 payment attempts, 0 duplicates"
+      },
+      {
+        id: "summary",
+        title: "Summary",
+        type: "summary",
+        problems: [
+          "Duplicate orders \u2192 pending order check blocks same-item duplicates",
+          "Lost konbini info \u2192 voucher URL stored in DB, accessible anytime",
+          "Unsafe cancel \u2192 always cancel via provider API, webhook is final authority"
+        ],
+        philosophy: [
+          "Order is permanent, payments are disposable",
+          "Webhook is the only truth",
+          "If money was collected, always honor it"
+        ],
+        closing: "Timeline: ~6 weeks to full production (phased rollout)\nRisk: Low \u2014 backward compatible, feature-flagged, no infrastructure change"
+      }
+    ];
+
+    let currentSlide = 0;
+
+    function renderSlide(index) {
+      const slide = slides[index];
+      const contentDiv = document.getElementById('slide-content');
+      let html = '';
+
+      if (slide.type === 'title') {
+        html = `
+          <h1>${slide.title}</h1>
+          <p class="subtitle">${slide.subtitle}</p>
+          <div class="meta-info">
+            <span>Date: ${slide.meta.date}</span>
+            <span>Status: ${slide.meta.status}</span>
+            <span>Team: ${slide.meta.team}</span>
+          </div>
+          <div class="details-grid">
+            ${slide.details.map(d => `<div class="detail-item">\u2713 ${d}</div>`).join('')}
+          </div>
+        `;
+      } else if (slide.type === 'list') {
+        html = `
+          <h2>${slide.title}</h2>
+          <p class="intro-text">${slide.intro}</p>
+          <div class="grid-2">
+            ${slide.items.map(item => `
+              <div class="card">
+                <div class="card-number">${item.num}</div>
+                <h3 style="color: #1E2761; font-size: 16px; margin: 0 0 0.5rem 0;">${item.title}</h3>
+                <p>${item.desc}</p>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (slide.type === 'table') {
+        html = `
+          <h2>${slide.title}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Before</th>
+                <th>After</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${slide.rows.map(row => `
+                <tr>
+                  <td style="font-weight: 500;">${row[0]}</td>
+                  <td class="text-secondary">${row[1]}</td>
+                  <td class="text-secondary">${row[2]}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } else if (slide.type === 'two-col') {
+        html = `
+          <h2>${slide.title}</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>${slide.left.title}</h3>
+              <ul>
+                ${slide.left.items.map(item => `<li>\u2022 ${item}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="card">
+              <h3>${slide.right.title}</h3>
+              <ul>
+                ${slide.right.items.map(item => `<li>\u2022 ${item}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      } else if (slide.type === 'principles') {
+        html = `
+          <h2>${slide.title}</h2>
+          ${slide.intro ? `<p class="intro-text">${slide.intro}</p>` : ''}
+          <div class="grid-2">
+            ${slide.items.map(item => `
+              <div class="card card-accent">
+                <h4 class="text-info">${item.num}. ${item.title}</h4>
+                <p>${item.desc}</p>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (slide.type === 'flow') {
+        html = `
+          <h2>${slide.title}</h2>
+          ${slide.intro ? `<p class="intro-text">${slide.intro}</p>` : ''}
+          <div>
+            ${slide.steps.map((step, i) => `
+              <div class="flow-step">
+                <div class="flow-number">${i + 1}</div>
+                <div class="flow-content">${step}</div>
+              </div>
+            `).join('')}
+          </div>
+          ${slide.insight ? `<p class="flow-insight">${slide.insight}</p>` : ''}
+          ${slide.link ? `<a href="${slide.link.url}" target="_blank" class="diagram-link">${slide.link.label} &rarr;</a>` : ''}
+        `;
+      } else if (slide.type === 'endpoints') {
+        html = `
+          <h2>${slide.title}</h2>
+          ${slide.intro ? `<p class="intro-text">${slide.intro}</p>` : ''}
+          <div>
+            ${slide.items.map(item => `
+              <div class="endpoint-item">
+                <span class="endpoint-method">${item.method}</span>
+                <span class="endpoint-path">${item.path}</span>
+                <span class="endpoint-desc">${item.desc}</span>
+              </div>
+            `).join('')}
+          </div>
+          <p style="font-size: 12px; color: #666; font-style: italic;">Old endpoints kept for backward compatibility, deprecated gradually</p>
+        `;
+      } else if (slide.type === 'refresh-table') {
+        html = `
+          <h2>${slide.title}</h2>
+          ${slide.intro ? `<p class="intro-text">${slide.intro}</p>` : ''}
+          <table>
+            <thead>
+              <tr>
+                <th>Context</th>
+                <th>Poll Interval</th>
+                <th>Max Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${slide.items.map(item => `
+                <tr>
+                  <td>${item.context}</td>
+                  <td class="text-info">${item.interval}</td>
+                  <td class="text-secondary">${item.duration}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          ${slide.actions ? `<p style="font-size: 13px; color: #666;"><strong>On status change:</strong> ${slide.actions}</p>` : ''}
+        `;
+      } else if (slide.type === 'benefits') {
+        html = `
+          <h2>${slide.title}</h2>
+          <div class="grid-3">
+            ${slide.sections.map(section => `
+              <div class="card">
+                <h3>${section.title}</h3>
+                <ul>
+                  ${section.items.map(item => `<li>\u2713 ${item}</li>`).join('')}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (slide.type === 'pros-cons') {
+        html = `
+          <h2>${slide.title}</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3 class="text-success">Pros</h3>
+              <ul>
+                ${slide.pros.map(p => `<li style="color: #27AE60;">+ ${p}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="card">
+              <h3 class="text-info">Cons</h3>
+              <ul>
+                ${slide.cons.map(c => `<li>- ${c}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      } else if (slide.type === 'timeline') {
+        html = `
+          <h2>${slide.title}</h2>
+          <div>
+            ${slide.phases.map(phase => `
+              <div class="timeline-item">
+                <h4>${phase.name}</h4>
+                <div class="timeline-weeks">${phase.weeks}</div>
+                <ul class="timeline-details">
+                  ${(Array.isArray(phase.items) ? phase.items : [phase.items]).map(item => `<li>\u2022 ${item}</li>`).join('')}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (slide.type === 'risks') {
+        html = `
+          <h2>${slide.title}</h2>
+          <div>
+            ${slide.items.map(item => `
+              <div class="risk-item">
+                <div class="risk-title">${item.risk}</div>
+                <div class="risk-impact">${item.impact || ''}</div>
+                <div class="risk-mitigation">${item.mit}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (slide.type === 'pages-components') {
+        html = `
+          <h2>${slide.title}</h2>
+          <h3>New Pages (${slide.pages.length})</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Page</th>
+                <th>Route</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${slide.pages.map(p => `
+                <tr>
+                  <td style="font-weight: 500;">${p.name}</td>
+                  <td><code>${p.route}</code></td>
+                  <td class="text-secondary">${p.purpose}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <hr class="section-divider">
+          <h3>Sub-components of PaymentPage (${slide.components.length})</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Shows When</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${slide.components.map(c => `
+                <tr>
+                  <td style="font-weight: 500;">${c.name}</td>
+                  <td class="text-secondary">${c.condition}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } else if (slide.type === 'file-table') {
+        html = `
+          <h2>${slide.title}</h2>
+          <div>
+            ${slide.files.map(f => `
+              <div class="file-row">
+                <div class="file-name">${f.name}</div>
+                <div class="file-purpose">${f.purpose}</div>
+              </div>
+            `).join('')}
+          </div>
+          ${slide.reuses ? `
+            <hr class="section-divider">
+            <h3>Reuses existing logic from:</h3>
+            <ul>
+              ${slide.reuses.map(r => `<li>\u2022 ${r}</li>`).join('')}
+            </ul>
+          ` : ''}
+        `;
+      } else if (slide.type === 'changes') {
+        html = `
+          <h2>${slide.title}</h2>
+          <div class="grid-2">
+            <div class="changes-section">
+              <h3 class="text-info">Changes (${slide.changed.length} items)</h3>
+              <ul>
+                ${slide.changed.map((c, i) => `<li>${i + 1}. ${c}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="changes-section">
+              <h3 class="text-success">Stays the Same</h3>
+              <ul>
+                ${slide.stays.map(s => `<li>\u2713 ${s}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      } else if (slide.type === 'gantt') {
+        html = `
+          <h2>${slide.title}</h2>
+          <div class="gantt-chart">Week:    1     2     3     4     5     6     7+
+         |     |     |     |     |     |     |
+Phase 1  <span class="bar">\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588</span>                              <span class="label">Foundation</span>
+         DB migration                              (Backend)
+         OrderService
+         New endpoints
+
+Phase 2              <span class="bar">\u2588\u2588\u2588\u2588\u2588\u2588</span>                        <span class="label">Konbini</span>
+                     Webhook update                Recovery
+                     Pending check
+
+Phase 3                    <span class="bar">\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588</span>            <span class="label">Frontend</span>
+                           PendingOrderDialog
+                           Payment page
+                           Modal fix
+                           Cancel flow
+
+Phase 4                                <span class="bar">\u2588\u2588\u2588\u2588\u2588\u2588</span>      <span class="label">Polish</span>
+                                       Polling     & Launch
+                                       QA
+                                       Staging
+
+Phase 5                                      <span class="bar">\u2588\u2588\u2588\u2588</span>  <span class="label">Cleanup</span>
+                                             Deprecate
+                                             old endpoints</div>
+        `;
+      } else if (slide.type === 'scenario') {
+        html = `
+          <h2>${slide.title}</h2>
+          <p class="intro-text">${slide.intro}</p>
+          <div class="scenario-timeline">
+            ${slide.steps.map(step => `
+              <div class="scenario-step${step.highlight ? ' highlight' : ''}${step.success ? ' success' : ''}">
+                ${step.text}
+              </div>
+            `).join('')}
+          </div>
+          ${slide.result ? `<div class="scenario-result">${slide.result}</div>` : ''}
+        `;
+      } else if (slide.type === 'summary') {
+        html = `
+          <h1>${slide.title}</h1>
+          <div style="margin-bottom: 2.5rem;">
+            <h3>3 Problems Solved</h3>
+            <ul>
+              ${slide.problems.map(p => `<li>\u2713 ${p}</li>`).join('')}
+            </ul>
+          </div>
+          <div style="margin-bottom: 2.5rem;">
+            <h3>Design Philosophy</h3>
+            <ul>
+              ${slide.philosophy.map(p => `<li>\u2022 ${p}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="summary-box">
+            <p>${slide.closing.replace(/\n/g, '<br>')}</p>
+          </div>
+        `;
+      } else if (slide.type === 'text') {
+        html = `
+          <h2>${slide.title}</h2>
+          ${slide.intro ? `<p class="intro-text">${slide.intro}</p>` : ''}
+          <div class="pre-text">${slide.content}</div>
+        `;
+      }
+
+      contentDiv.innerHTML = html;
+      document.getElementById('current-page').textContent = index + 1;
+      document.getElementById('total-pages').textContent = slides.length;
+
+      document.querySelectorAll('#nav-list button').forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+    }
+
+    function initNav() {
+      const navList = document.getElementById('nav-list');
+      slides.forEach((slide, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = slide.title;
+        btn.onclick = () => {
+          currentSlide = i;
+          renderSlide(i);
+        };
+        if (i === 0) btn.classList.add('active');
+        navList.appendChild(btn);
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        renderSlide(currentSlide);
+        const activeBtn = document.querySelectorAll('#nav-list button')[currentSlide];
+        if (activeBtn) activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    function previousSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide(currentSlide);
+        const activeBtn = document.querySelectorAll('#nav-list button')[currentSlide];
+        if (activeBtn) activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        previousSlide();
+      }
+    });
+
+    initNav();
+    renderSlide(0);
+  </script>
+</body>
+</html>

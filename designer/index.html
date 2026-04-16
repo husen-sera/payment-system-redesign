@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment System - Designer Brief</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: white;
+      color: #1E2761;
+      line-height: 1.6;
+    }
+
+    .container { display: flex; height: 100vh; }
+
+    .sidebar {
+      width: 280px;
+      background: #FFF8F0;
+      border-right: 0.5px solid #E0D8D0;
+      padding: 2rem 0;
+      overflow-y: auto;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 0 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 500;
+      margin: 0 0 0.5rem 0;
+      color: #1E2761;
+    }
+
+    .sidebar-header p {
+      font-size: 12px;
+      color: #B08968;
+      margin: 0;
+    }
+
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .sidebar button {
+      padding: 0.6rem 1.5rem;
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 12px;
+      color: #999;
+      transition: all 0.2s;
+      font-weight: 400;
+    }
+
+    .sidebar button.active {
+      background: white;
+      color: #D4793A;
+      font-weight: 500;
+    }
+
+    .sidebar button:hover { color: #1E2761; }
+
+    .sidebar .nav-section {
+      padding: 0.5rem 1.5rem 0.25rem;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #B08968;
+      font-weight: 600;
+      margin-top: 0.75rem;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 3rem 4rem;
+    }
+
+    .content-wrapper { max-width: 900px; }
+
+    .slide-content {
+      animation: slideIn 0.6s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 { font-size: 44px; font-weight: 500; margin: 0 0 1rem 0; }
+    h2 { font-size: 32px; font-weight: 500; margin: 0 0 2rem 0; }
+    h3 { font-size: 16px; font-weight: 500; margin: 0 0 1rem 0; }
+    h4 { font-size: 14px; font-weight: 500; margin: 0; }
+
+    .subtitle { font-size: 20px; color: #666; margin: 0 0 2rem 0; }
+    .intro-text { font-size: 15px; color: #666; margin: 0 0 2rem 0; line-height: 1.7; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+    }
+
+    .badge-high { background: #FDECEA; color: #D32F2F; }
+    .badge-medium { background: #FFF3E0; color: #E65100; }
+    .badge-low { background: #E8F5E9; color: #2E7D32; }
+    .badge-screen { background: #E3F2FD; color: #1565C0; }
+    .badge-state { background: #F3E5F5; color: #7B1FA2; }
+    .badge-modal { background: #FFF8E1; color: #F57F17; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+
+    .card {
+      padding: 1.5rem;
+      background: #FAFAF8;
+      border-radius: 12px;
+      border: 0.5px solid #E0D8D0;
+    }
+
+    .card h3 { color: #D4793A; margin: 0 0 1rem 0; }
+    .card p { color: #666; margin: 0; font-size: 13px; }
+
+    table {
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 8px;
+      font-weight: 500;
+      color: #1E2761;
+      border-bottom: 1px solid #E0D8D0;
+      font-size: 12px;
+    }
+
+    td {
+      padding: 10px 8px;
+      border-bottom: 0.5px solid #E0D8D0;
+      vertical-align: top;
+    }
+
+    td:first-child { font-weight: 500; color: #1E2761; white-space: nowrap; }
+
+    ul { list-style: none; padding: 0; margin: 0; }
+    ul li { padding: 0.4rem 0; color: #666; font-size: 13px; }
+
+    .spec-table { margin-bottom: 2rem; }
+    .spec-table td:first-child { color: #D4793A; width: 180px; }
+
+    .screen-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .screen-header h2 { margin: 0; }
+
+    .note-box {
+      padding: 1rem 1.25rem;
+      background: #FFF8F0;
+      border-radius: 8px;
+      border-left: 3px solid #D4793A;
+      font-size: 13px;
+      color: #666;
+      margin: 1.5rem 0;
+      line-height: 1.7;
+    }
+
+    .note-box strong { color: #D4793A; }
+
+    .pre-text {
+      padding: 1.5rem;
+      background: #FAFAF8;
+      border-radius: 12px;
+      border: 0.5px solid #E0D8D0;
+      font-size: 12px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      color: #666;
+      white-space: pre-wrap;
+      line-height: 1.7;
+    }
+
+    .checklist-item {
+      padding: 1rem;
+      background: #FAFAF8;
+      border-radius: 8px;
+      border: 0.5px solid #E0D8D0;
+      display: grid;
+      grid-template-columns: 30px 1fr 1fr 90px;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .checklist-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #D4793A;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .checklist-screen { font-weight: 500; font-size: 13px; }
+    .checklist-variants { font-size: 12px; color: #999; }
+
+    .status-row {
+      padding: 0.75rem 1rem;
+      background: #FAFAF8;
+      border-radius: 8px;
+      border: 0.5px solid #E0D8D0;
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 13px;
+    }
+
+    .status-key {
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      color: #D4793A;
+      font-weight: 500;
+    }
+
+    .status-val { color: #666; }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 0.5px solid #E0D8D0;
+    }
+
+    .button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .button-secondary {
+      background: white;
+      border: 0.5px solid #E0D8D0;
+      color: #1E2761;
+    }
+
+    .button-secondary:hover { background: #FAFAF8; }
+
+    .button-primary { background: #D4793A; color: white; }
+    .button-primary:hover { background: #B8612E; }
+
+    .page-counter { font-size: 13px; color: #999; }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      font-size: 13px;
+      color: #D4793A;
+      text-decoration: none;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: #E0D8D0; border-radius: 3px; }
+    .main-content::-webkit-scrollbar { width: 8px; }
+    .main-content::-webkit-scrollbar-track { background: transparent; }
+    .main-content::-webkit-scrollbar-thumb { background: #E0D8D0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h1>Designer Brief</h1>
+        <p>Payment System Redesign</p>
+      </div>
+      <nav id="nav-list"></nav>
+    </div>
+
+    <div class="main-content">
+      <div class="content-wrapper">
+        <a href="../" class="back-link">&larr; All Presentations</a>
+        <div id="slide-content" class="slide-content"></div>
+        <div class="footer">
+          <button class="button button-secondary" onclick="previousSlide()">&larr; Previous</button>
+          <span class="page-counter"><span id="current-page">1</span> / <span id="total-pages">1</span></span>
+          <button class="button button-primary" onclick="nextSlide()">Next &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slides = [
+      {
+        id: "title",
+        title: "Designer Brief",
+        type: "title",
+        section: "Overview"
+      },
+      {
+        id: "summary",
+        title: "What We're Building",
+        type: "what-building",
+        section: "Overview"
+      },
+      {
+        id: "screens-overview",
+        title: "Screens to Design",
+        type: "screens-overview",
+        section: "Overview"
+      },
+      {
+        id: "a1-konbini",
+        title: "PendingOrderDialog \u2014 Konbini",
+        type: "spec-table",
+        section: "Screen A: Modal",
+        badge: "modal",
+        variant: "Variant A1",
+        intro: "User chose konbini (convenience store) payment before but hasn't paid yet.",
+        specs: [
+          ["\u30BF\u30A4\u30C8\u30EB", "\u304A\u652F\u6255\u3044\u5F85\u3061\u306E\u6CE8\u6587\u304C\u3042\u308A\u307E\u3059"],
+          ["\u652F\u6255\u3044\u65B9\u6CD5", "\u30B3\u30F3\u30D3\u30CB\u652F\u6255\u3044"],
+          ["\u671F\u9650\u60C5\u5831", "\u671F\u9650: {date} (e.g. 2026\u5E744\u670818\u65E5)"],
+          ["Primary button", "\u652F\u6255\u3044\u60C5\u5831\u3092\u8868\u793A\u3059\u308B \u2192 opens external Stripe voucher page"],
+          ["Secondary button", "\u304A\u652F\u6255\u3044\u72B6\u6CC1\u3092\u78BA\u8A8D\u3059\u308B \u2192 goes to Payment Page"],
+          ["Destructive link", "\u30AD\u30E3\u30F3\u30BB\u30EB\u3057\u3066\u5225\u306E\u65B9\u6CD5\u3067\u652F\u6255\u3046 \u2192 cancels, opens method selector"]
+        ]
+      },
+      {
+        id: "a2-paypay",
+        title: "PendingOrderDialog \u2014 PayPay",
+        type: "spec-table",
+        section: "Screen A: Modal",
+        badge: "modal",
+        variant: "Variant A2",
+        intro: "User started a PayPay payment but didn't complete it.",
+        specs: [
+          ["\u30BF\u30A4\u30C8\u30EB", "\u304A\u652F\u6255\u3044\u5F85\u3061\u306E\u6CE8\u6587\u304C\u3042\u308A\u307E\u3059"],
+          ["\u652F\u6255\u3044\u65B9\u6CD5", "PayPay\u652F\u6255\u3044"],
+          ["Primary button", "PayPay\u3067\u652F\u6255\u3044\u3092\u7D9A\u3051\u308B \u2192 goes to Payment Page"],
+          ["Destructive link", "\u30AD\u30E3\u30F3\u30BB\u30EB\u3057\u3066\u5225\u306E\u65B9\u6CD5\u3067\u652F\u6255\u3046 \u2192 cancels, opens method selector"]
+        ]
+      },
+      {
+        id: "a3-card",
+        title: "PendingOrderDialog \u2014 Card",
+        type: "spec-table",
+        section: "Screen A: Modal",
+        badge: "modal",
+        variant: "Variant A3",
+        intro: "Rare \u2014 user closed Stripe Checkout mid-payment.",
+        specs: [
+          ["\u30BF\u30A4\u30C8\u30EB", "\u304A\u652F\u6255\u3044\u5F85\u3061\u306E\u6CE8\u6587\u304C\u3042\u308A\u307E\u3059"],
+          ["\u652F\u6255\u3044\u65B9\u6CD5", "\u30AB\u30FC\u30C9\u652F\u6255\u3044"],
+          ["Primary button", "\u652F\u6255\u3044\u3092\u7D9A\u3051\u308B \u2192 goes to Payment Page"],
+          ["Destructive link", "\u30AD\u30E3\u30F3\u30BB\u30EB\u3057\u3066\u5225\u306E\u65B9\u6CD5\u3067\u652F\u6255\u3046"]
+        ]
+      },
+      {
+        id: "b1-prepared",
+        title: "Payment Page \u2014 PREPARED",
+        type: "spec-table",
+        section: "Screen B: Payment Page",
+        badge: "state",
+        variant: "State B1",
+        intro: "User created an order but hasn't picked a payment method yet.",
+        specs: [
+          ["Header", "\u6CE8\u6587 #{orderId}"],
+          ["Status label", "\u304A\u652F\u6255\u3044\u65B9\u6CD5\u3092\u9078\u629E\u3057\u3066\u304F\u3060\u3055\u3044"],
+          ["Action", "Show payment method selector (PayPay / Stripe)"]
+        ]
+      },
+      {
+        id: "b2-konbini",
+        title: "Payment Page \u2014 Konbini Pending",
+        type: "spec-table",
+        section: "Screen B: Payment Page",
+        badge: "state",
+        variant: "State B2",
+        intro: "User chose konbini. Voucher has been issued. Waiting for them to pay at a store.",
+        specs: [
+          ["Header", "\u6CE8\u6587 #{orderId}"],
+          ["Status label", "\u30B9\u30C6\u30FC\u30BF\u30B9: \u304A\u652F\u6255\u3044\u5F85\u3061"],
+          ["Card/section", "\u30B3\u30F3\u30D3\u30CB\u652F\u6255\u3044"],
+          ["Expiry", "\u671F\u9650: {date} {time} (countdown or date format)"],
+          ["Primary button", "\u652F\u6255\u3044\u60C5\u5831\u3092\u8868\u793A\u3059\u308B \u2192 opens Stripe voucher page (new tab)"],
+          ["Secondary link", "\u652F\u6255\u3044\u65B9\u6CD5\u3092\u5909\u66F4\u3059\u308B \u2192 cancels current, shows method selector"],
+          ["Destructive link", "\u6CE8\u6587\u3092\u30AD\u30E3\u30F3\u30BB\u30EB\u3059\u308B \u2192 full cancel, confirm dialog first"],
+          ["Footer indicator", "\u21BB \u304A\u652F\u6255\u3044\u78BA\u8A8D\u5F8C\u3001\u81EA\u52D5\u7684\u306B\u66F4\u65B0\u3055\u308C\u307E\u3059 (auto-polling active)"]
+        ],
+        notes: ["The expiry countdown is important \u2014 make it visually prominent", "The voucher link opens an external Stripe-hosted page (not our UI)", "The page auto-refreshes every 30 seconds (no user action needed)"]
+      },
+      {
+        id: "b3-processing",
+        title: "Payment Page \u2014 Processing",
+        type: "spec-table",
+        section: "Screen B: Payment Page",
+        badge: "state",
+        variant: "State B3",
+        intro: "User paid (or is paying) via card or PayPay. Webhook hasn't arrived yet.",
+        specs: [
+          ["Header", "\u6CE8\u6587 #{orderId}"],
+          ["Status label", "\u304A\u652F\u6255\u3044\u51E6\u7406\u4E2D..."],
+          ["Visual", "Loading spinner or animation"],
+          ["Subtext", "\u304A\u652F\u6255\u3044\u304C\u78BA\u8A8D\u3067\u304D\u6B21\u7B2C\u3001\u81EA\u52D5\u7684\u306B\u66F4\u65B0\u3055\u308C\u307E\u3059"],
+          ["Secondary link", "\u652F\u6255\u3044\u65B9\u6CD5\u3092\u5909\u66F4\u3059\u308B"],
+          ["Destructive link", "\u6CE8\u6587\u3092\u30AD\u30E3\u30F3\u30BB\u30EB\u3059\u308B"],
+          ["Footer indicator", "\u21BB (polling every 5 seconds)"]
+        ]
+      },
+      {
+        id: "b4-success",
+        title: "Payment Page \u2014 Success",
+        type: "spec-table",
+        section: "Screen B: Payment Page",
+        badge: "state",
+        variant: "State B4",
+        intro: "Webhook confirmed the payment. Brief success screen before redirect.",
+        specs: [
+          ["Status", "\u304A\u652F\u6255\u3044\u5B8C\u4E86\uFF01"],
+          ["Visual", "Success icon / checkmark animation"],
+          ["Button", "\u7D50\u679C\u3092\u898B\u308B \u2192 redirects to /paid (gacha/success page)"]
+        ],
+        notes: ["This screen is shown briefly (1\u20132 seconds) before auto-redirect", "Or can be a simple transition animation"]
+      },
+      {
+        id: "b5-failed",
+        title: "Payment Page \u2014 Failed",
+        type: "spec-table",
+        section: "Screen B: Payment Page",
+        badge: "state",
+        variant: "State B5",
+        intro: "Payment didn't go through (e.g. konbini expired after 3 days, card declined).",
+        specs: [
+          ["Status", "\u304A\u652F\u6255\u3044\u306B\u5931\u6557\u3057\u307E\u3057\u305F"],
+          ["Visual", "Error icon"],
+          ["Explanation", "\u304A\u652F\u6255\u3044\u671F\u9650\u304C\u5207\u308C\u307E\u3057\u305F / \u30AB\u30FC\u30C9\u304C\u62D2\u5426\u3055\u308C\u307E\u3057\u305F (context-dependent)"],
+          ["Primary button", "\u3082\u3046\u4E00\u5EA6\u8CFC\u5165\u3059\u308B \u2192 goes back to product page to create new order"],
+          ["Secondary link", "\u30DB\u30FC\u30E0\u306B\u623B\u308B"]
+        ]
+      },
+      {
+        id: "b6-cancelled",
+        title: "Payment Page \u2014 Cancelled",
+        type: "spec-table",
+        section: "Screen B: Payment Page",
+        badge: "state",
+        variant: "State B6",
+        intro: "User explicitly cancelled the order.",
+        specs: [
+          ["Status", "\u6CE8\u6587\u304C\u30AD\u30E3\u30F3\u30BB\u30EB\u3055\u308C\u307E\u3057\u305F"],
+          ["Primary button", "\u30DB\u30FC\u30E0\u306B\u623B\u308B"]
+        ]
+      },
+      {
+        id: "cancel-dialog",
+        title: "Cancel Confirmation Dialog",
+        type: "spec-table",
+        section: "Screen C & D",
+        badge: "modal",
+        variant: "Screen C",
+        intro: "Small confirmation modal triggered from the Payment Page or PendingOrderDialog.",
+        specs: [
+          ["Title", "\u3053\u306E\u6CE8\u6587\u3092\u30AD\u30E3\u30F3\u30BB\u30EB\u3057\u307E\u3059\u304B\uFF1F"],
+          ["Body text", "\u30AD\u30E3\u30F3\u30BB\u30EB\u3059\u308B\u3068\u3001\u304A\u652F\u6255\u3044\u60C5\u5831\u306F\u7121\u52B9\u306B\u306A\u308A\u307E\u3059"],
+          ["Confirm button (destructive)", "\u30AD\u30E3\u30F3\u30BB\u30EB\u3059\u308B"],
+          ["Dismiss button", "\u623B\u308B"]
+        ]
+      },
+      {
+        id: "error-409",
+        title: "Error State \u2014 409 Processing",
+        type: "spec-table",
+        section: "Screen C & D",
+        badge: "screen",
+        variant: "Screen D",
+        intro: "Shown when user tries to cancel but the payment is already being processed (race condition).",
+        specs: [
+          ["Type", "Inline alert / toast / small modal"],
+          ["Message", "\u304A\u652F\u6255\u3044\u304C\u51E6\u7406\u4E2D\u3067\u3059\u3002\u3057\u3070\u3089\u304F\u304A\u5F85\u3061\u304F\u3060\u3055\u3044\u3002"],
+          ["Action", "Auto-dismiss after a few seconds, or \"OK\" button"]
+        ]
+      },
+      {
+        id: "existing-modal",
+        title: "CheckoutSelectorModal (Existing)",
+        type: "existing-modify",
+        section: "Existing Changes"
+      },
+      {
+        id: "user-flow",
+        title: "User Flow Map",
+        type: "flow-map",
+        section: "Reference"
+      },
+      {
+        id: "dynamic-data",
+        title: "Dynamic Data",
+        type: "dynamic-data",
+        section: "Reference"
+      },
+      {
+        id: "design-considerations",
+        title: "Design Considerations",
+        type: "design-considerations",
+        section: "Reference"
+      },
+      {
+        id: "checklist",
+        title: "Deliverables Checklist",
+        type: "checklist",
+        section: "Reference"
+      },
+      {
+        id: "status-mapping",
+        title: "Status \u2194 UI Mapping",
+        type: "status-mapping",
+        section: "Reference"
+      }
+    ];
+
+    let currentSlide = 0;
+
+    function renderSlide(index) {
+      const slide = slides[index];
+      const contentDiv = document.getElementById('slide-content');
+      let html = '';
+
+      if (slide.type === 'title') {
+        html = `
+          <h1>Payment System Redesign</h1>
+          <p class="subtitle">Designer Brief</p>
+          <p class="intro-text">Everything a designer needs to create UI for the new payment flow.<br>9 screens / variants to design across 1 modal and 1 page.</p>
+          <div class="grid-3">
+            <div class="card">
+              <h3>Screen A</h3>
+              <p>PendingOrderDialog<br><strong>3 variants</strong> (Konbini, PayPay, Card)</p>
+            </div>
+            <div class="card">
+              <h3>Screen B</h3>
+              <p>Payment Page<br><strong>6 states</strong> (Prepared \u2192 Success/Failed/Cancelled)</p>
+            </div>
+            <div class="card">
+              <h3>Screen C & D</h3>
+              <p>Cancel Confirmation + Error toast<br><strong>2 variants</strong></p>
+            </div>
+          </div>
+          <div class="note-box" style="margin-top:2rem;">
+            <strong>Reference:</strong> See <a href="../engineering/" style="color:#D4793A;">Engineering Presentation</a> for full technical details and <a href="../engineering/payment-flow-diagram.html" style="color:#D4793A;">Interactive Diagrams</a> for flow visualizations.
+          </div>
+        `;
+      } else if (slide.type === 'what-building') {
+        html = `
+          <h2>What We're Building</h2>
+          <p class="intro-text">Users currently have 3 problems:</p>
+          <div style="margin-bottom:2rem;">
+            <div class="card" style="margin-bottom:1rem; border-left: 3px solid #D32F2F;">
+              <h3 style="color:#D32F2F;">1. Lost Payment Codes</h3>
+              <p>If users close the browser after choosing konbini payment, they lose the payment code forever</p>
+            </div>
+            <div class="card" style="margin-bottom:1rem; border-left: 3px solid #E65100;">
+              <h3 style="color:#E65100;">2. Can't Switch Methods</h3>
+              <p>Users can't switch payment methods (e.g. PayPay to card) without creating duplicate orders</p>
+            </div>
+            <div class="card" style="border-left: 3px solid #F57F17;">
+              <h3 style="color:#F57F17;">3. No Auto-Update</h3>
+              <p>Payment status doesn't update automatically \u2014 they have to refresh manually</p>
+            </div>
+          </div>
+          <div class="note-box">
+            <strong>Solution:</strong> We're adding <strong>1 new modal</strong> (PendingOrderDialog) and <strong>1 new page</strong> (/payment/:orderId) to fix all of this.
+          </div>
+        `;
+      } else if (slide.type === 'screens-overview') {
+        html = `
+          <h2>Screens to Design</h2>
+          <p class="intro-text">Total: 9 screens / variants</p>
+          <div class="grid-2">
+            <div class="card">
+              <span class="badge badge-modal">Modal</span>
+              <h3>Screen A: PendingOrderDialog</h3>
+              <p>Shown when user clicks "Buy" but already has a pending order for the same item.</p>
+              <ul style="margin-top:0.75rem;">
+                <li>\u2022 A1: Konbini pending (voucher + expiry)</li>
+                <li>\u2022 A2: PayPay pending</li>
+                <li>\u2022 A3: Card pending (rare)</li>
+              </ul>
+            </div>
+            <div class="card">
+              <span class="badge badge-screen">Full Page</span>
+              <h3>Screen B: /payment/:orderId</h3>
+              <p>Dedicated payment status page. Users land here after starting payment. Bookmarkable.</p>
+              <ul style="margin-top:0.75rem;">
+                <li>\u2022 B1: PREPARED (pick method)</li>
+                <li>\u2022 B2: Konbini pending</li>
+                <li>\u2022 B3: Card/PayPay processing</li>
+                <li>\u2022 B4: Success</li>
+                <li>\u2022 B5: Failed</li>
+                <li>\u2022 B6: Cancelled</li>
+              </ul>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:1.5rem;">
+            <div class="card">
+              <span class="badge badge-modal">Modal</span>
+              <h3>Screen C: Cancel Confirmation</h3>
+              <p>Simple confirm dialog before cancelling an order.</p>
+            </div>
+            <div class="card">
+              <span class="badge badge-low">Toast / Alert</span>
+              <h3>Screen D: Error 409</h3>
+              <p>Shown when payment is already processing and can't be cancelled.</p>
+            </div>
+          </div>
+        `;
+      } else if (slide.type === 'spec-table') {
+        html = `
+          <div class="screen-header">
+            <h2>${slide.title}</h2>
+          </div>
+          <span class="badge badge-${slide.badge}">${slide.variant}</span>
+          <p class="intro-text">${slide.intro}</p>
+          <table class="spec-table">
+            <thead><tr><th>Element</th><th>Detail</th></tr></thead>
+            <tbody>
+              ${slide.specs.map(row => `
+                <tr><td>${row[0]}</td><td>${row[1]}</td></tr>
+              `).join('')}
+            </tbody>
+          </table>
+          ${slide.notes ? `
+            <div class="note-box">
+              <strong>Designer notes:</strong><br>
+              ${slide.notes.map(n => `\u2022 ${n}`).join('<br>')}
+            </div>
+          ` : ''}
+        `;
+      } else if (slide.type === 'existing-modify') {
+        html = `
+          <h2>CheckoutSelectorModal</h2>
+          <span class="badge badge-low">Existing \u2014 No Visual Change</span>
+          <p class="intro-text">The only change is behavioral:</p>
+          <div class="grid-2">
+            <div class="card" style="border-left: 3px solid #D32F2F;">
+              <h3 style="color:#D32F2F;">Before</h3>
+              <p>PayPay order is created <strong>automatically</strong> when the modal opens</p>
+            </div>
+            <div class="card" style="border-left: 3px solid #2E7D32;">
+              <h3 style="color:#2E7D32;">After</h3>
+              <p>PayPay order is created <strong>only when the user clicks</strong> the PayPay button</p>
+            </div>
+          </div>
+          <div class="note-box" style="margin-top:1.5rem;">
+            <strong>Optional enhancement:</strong> If the designer wants to add a subtle loading state on the PayPay button after click, that would be a nice touch.
+          </div>
+        `;
+      } else if (slide.type === 'flow-map') {
+        html = `
+          <h2>User Flow Map</h2>
+          <p class="intro-text">All screens connected \u2014 how users navigate through the payment system.</p>
+          <div class="pre-text">Product Page
+    \u2502
+    \u2502 [Buy button click]
+    \u2502
+    \u251C\u2500\u2500 No pending order
+    \u2502   \u2514\u2500\u2500 CheckoutSelectorModal (existing)
+    \u2502       \u251C\u2500\u2500 User picks Stripe \u2192 redirect to Stripe Checkout
+    \u2502       \u2514\u2500\u2500 User picks PayPay \u2192 redirect to PayPay
+    \u2502           \u2502
+    \u2502           \u2514\u2500\u2500 After redirect \u2192 /payment/:orderId [Screen B]
+    \u2502
+    \u2514\u2500\u2500 Has pending order
+        \u2514\u2500\u2500 PendingOrderDialog [Screen A]
+            \u2502
+            \u251C\u2500\u2500 "Resume / View voucher"
+            \u2502   \u2514\u2500\u2500 /payment/:orderId [Screen B]
+            \u2502
+            \u2514\u2500\u2500 "Cancel & New Method"
+                \u2514\u2500\u2500 Cancel Confirmation [Screen C]
+                    \u251C\u2500\u2500 Confirmed \u2192 CheckoutSelectorModal
+                    \u2514\u2500\u2500 Dismissed \u2192 back to dialog
+
+/payment/:orderId [Screen B]
+    \u2502
+    \u251C\u2500\u2500 Polling detects SUCCESS
+    \u2502   \u2514\u2500\u2500 Success state [B4] \u2192 auto-redirect to /paid
+    \u2502
+    \u251C\u2500\u2500 "Change method" clicked
+    \u2502   \u2514\u2500\u2500 Cancel Confirmation [Screen C]
+    \u2502       \u2514\u2500\u2500 CheckoutSelectorModal (same order)
+    \u2502
+    \u2514\u2500\u2500 "Cancel order" clicked
+        \u2514\u2500\u2500 Cancel Confirmation [Screen C]
+            \u2514\u2500\u2500 Redirect to home</div>
+        `;
+      } else if (slide.type === 'dynamic-data') {
+        html = `
+          <h2>Dynamic Data the UI Displays</h2>
+          <p class="intro-text">Data fields the designer should account for in layouts.</p>
+          <table>
+            <thead><tr><th>Data</th><th>Where It Appears</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td>Order ID</td><td>Payment Page header</td><td>#502</td></tr>
+              <tr><td>Payment method</td><td>PendingOrderDialog, Payment Page</td><td>\u30B3\u30F3\u30D3\u30CB / PayPay / \u30AB\u30FC\u30C9</td></tr>
+              <tr><td>Amount</td><td>Payment Page</td><td>\u00A53,000</td></tr>
+              <tr><td>Expiry date</td><td>PendingOrderDialog, Payment Page</td><td>2026\u5E744\u670818\u65E5 23:59</td></tr>
+              <tr><td>Item name</td><td>PendingOrderDialog (optional)</td><td>GL-3 \u691C\u7D22\u6A29</td></tr>
+              <tr><td>Order status</td><td>Payment Page</td><td>\u304A\u652F\u6255\u3044\u5F85\u3061 / \u51E6\u7406\u4E2D / \u5B8C\u4E86 / \u5931\u6557 / \u30AD\u30E3\u30F3\u30BB\u30EB</td></tr>
+              <tr><td>Discount/coupon</td><td>Payment Page (if applicable)</td><td>\u00A5500 \u5272\u5F15\u9069\u7528\u6E08\u307F</td></tr>
+            </tbody>
+          </table>
+        `;
+      } else if (slide.type === 'design-considerations') {
+        html = `
+          <h2>Design Considerations</h2>
+          <div class="card" style="margin-bottom:1.5rem; border-left: 3px solid #1565C0;">
+            <h3 style="color:#1565C0;">Mobile First</h3>
+            <ul>
+              <li>\u2022 Both the modal and the payment page must work on mobile</li>
+              <li>\u2022 PendingOrderDialog is a bottom sheet on mobile, centered modal on desktop</li>
+              <li>\u2022 Payment Page is a standard full-width page</li>
+            </ul>
+          </div>
+          <div class="card" style="margin-bottom:1.5rem; border-left: 3px solid #E65100;">
+            <h3 style="color:#E65100;">Urgency & Clarity</h3>
+            <ul>
+              <li>\u2022 Konbini expiry should feel urgent but not alarming (countdown or clear date)</li>
+              <li>\u2022 The voucher button should be the most prominent element when konbini is pending</li>
+              <li>\u2022 Users may not understand "konbini" technically \u2014 use clear language like "\u30B3\u30F3\u30D3\u30CB\u652F\u6255\u3044"</li>
+            </ul>
+          </div>
+          <div class="card" style="margin-bottom:1.5rem; border-left: 3px solid #7B1FA2;">
+            <h3 style="color:#7B1FA2;">Loading & Transitions</h3>
+            <ul>
+              <li>\u2022 After "Cancel & New Method": brief loading state while API call runs</li>
+              <li>\u2022 After clicking payment method: loading state until redirect</li>
+              <li>\u2022 Polling indicator should be subtle (small spinner or text, not full-page loader)</li>
+              <li>\u2022 SUCCESS state can auto-redirect after 2 seconds, or let user click</li>
+            </ul>
+          </div>
+          <div class="card" style="border-left: 3px solid #2E7D32;">
+            <h3 style="color:#2E7D32;">Error Handling & Consistency</h3>
+            <ul>
+              <li>\u2022 409 (payment being processed) \u2014 non-blocking alert, not a page error</li>
+              <li>\u2022 Network error during cancel \u2014 retry button or "try again later" message</li>
+              <li>\u2022 Existing success page (/paid) and gacha animation are unchanged</li>
+              <li>\u2022 New components should match the existing design system</li>
+            </ul>
+          </div>
+        `;
+      } else if (slide.type === 'checklist') {
+        const items = [
+          { n: 1, screen: "PendingOrderDialog (Modal)", variants: "Konbini, PayPay, Card (3 variants)", priority: "high" },
+          { n: 2, screen: "Payment Page \u2014 Konbini pending", variants: "Desktop + Mobile", priority: "high" },
+          { n: 3, screen: "Payment Page \u2014 Card/PayPay waiting", variants: "Desktop + Mobile", priority: "high" },
+          { n: 4, screen: "Payment Page \u2014 Success", variants: "Desktop + Mobile", priority: "medium" },
+          { n: 5, screen: "Payment Page \u2014 Failed", variants: "Desktop + Mobile", priority: "medium" },
+          { n: 6, screen: "Payment Page \u2014 Cancelled", variants: "Desktop + Mobile", priority: "low" },
+          { n: 7, screen: "Payment Page \u2014 Method selector", variants: "Desktop + Mobile", priority: "medium" },
+          { n: 8, screen: "Cancel Confirmation Dialog", variants: "1 variant", priority: "medium" },
+          { n: 9, screen: "Error toast (409 processing)", variants: "1 variant", priority: "low" }
+        ];
+        html = `
+          <h2>Deliverables Checklist</h2>
+          <p class="intro-text">Total: 9 screens / variants to design</p>
+          ${items.map(item => `
+            <div class="checklist-item">
+              <div class="checklist-num">${item.n}</div>
+              <div class="checklist-screen">${item.screen}</div>
+              <div class="checklist-variants">${item.variants}</div>
+              <span class="badge badge-${item.priority}">${item.priority}</span>
+            </div>
+          `).join('')}
+        `;
+      } else if (slide.type === 'status-mapping') {
+        const mappings = [
+          ["PREPARED", "Payment method selector (pick Stripe or PayPay)"],
+          ["PENDING + konbini", "Voucher link + expiry + \"change method\" + polling"],
+          ["PENDING + card", "\"Processing...\" spinner + polling"],
+          ["PENDING + paypay", "\"Waiting for PayPay...\" spinner + polling"],
+          ["SUCCESS", "Checkmark + \"View result\" button \u2192 redirect"],
+          ["FAILED", "Error + \"Try again\" button"],
+          ["CANCELLED", "\"Order cancelled\" + \"Go home\" button"]
+        ];
+        html = `
+          <h2>Status \u2194 UI Mapping</h2>
+          <p class="intro-text">Quick reference: which UI state to show for each order status.</p>
+          ${mappings.map(m => `
+            <div class="status-row">
+              <div class="status-key">${m[0]}</div>
+              <div class="status-val">${m[1]}</div>
+            </div>
+          `).join('')}
+        `;
+      }
+
+      contentDiv.innerHTML = html;
+      document.getElementById('current-page').textContent = index + 1;
+      document.getElementById('total-pages').textContent = slides.length;
+
+      document.querySelectorAll('#nav-list button').forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+    }
+
+    function initNav() {
+      const navList = document.getElementById('nav-list');
+      let currentSection = '';
+      slides.forEach((slide, i) => {
+        if (slide.section && slide.section !== currentSection) {
+          currentSection = slide.section;
+          const div = document.createElement('div');
+          div.className = 'nav-section';
+          div.textContent = currentSection;
+          navList.appendChild(div);
+        }
+        const btn = document.createElement('button');
+        btn.textContent = slide.title;
+        btn.onclick = () => { currentSlide = i; renderSlide(i); };
+        if (i === 0) btn.classList.add('active');
+        navList.appendChild(btn);
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        renderSlide(currentSlide);
+        const activeBtn = document.querySelectorAll('#nav-list button')[currentSlide];
+        if (activeBtn) activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    function previousSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide(currentSlide);
+        const activeBtn = document.querySelectorAll('#nav-list button')[currentSlide];
+        if (activeBtn) activeBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); previousSlide(); }
+    });
+
+    initNav();
+    renderSlide(0);
+  </script>
+</body>
+</html>
